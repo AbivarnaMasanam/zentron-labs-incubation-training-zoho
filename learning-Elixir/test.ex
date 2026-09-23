@@ -1,1 +1,1 @@
-IO.puts("Hiii...testing")
+IO.puts("Hello world")
