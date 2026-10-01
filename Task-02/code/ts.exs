@@ -38,6 +38,6 @@
 #   _ ->
 #     IO.puts("Invalid input! Please enter a number.")
 # end
-Code.require_file("UserInputModule.exs")
+Code.require_file("zentron-labs-incubation-training-zoho/Task-02/BinarySearch.ex")
 
-UserInputModule.calling_fun()
+BinarySearch.search(UserInputModule.calling_fun(), 50)

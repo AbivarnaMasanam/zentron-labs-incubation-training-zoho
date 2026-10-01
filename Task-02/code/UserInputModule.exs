@@ -1,3 +1,5 @@
+Code.require_file("../BinarySearch.ex")
+
 defmodule UserInputModule do
   def get_input(promt) do
     input =
@@ -38,6 +40,10 @@ defmodule UserInputModule do
   def calling_fun do
     # here, we are the function to ge the total number input and get the input one by one, print on the
     # consloe using the inspect.....
-    IO.inspect(ask_input(get_input("Enter How Many you want: ")))
+    mapValue = ask_input(get_input("Enter How Many you want: "))
+    targetValue = get_input("Enter the Target Value: ")
+    IO.puts(BinarySearch.search(mapValue, targetValue))
   end
 end
+
+UserInputModule.calling_fun()

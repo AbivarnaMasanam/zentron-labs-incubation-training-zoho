@@ -37,4 +37,22 @@ defmodule SearchTree do
         search(right, value)
     end
   end
+
+  def input(promt) do
+    inputvalue =
+      IO.gets(promt)
+      |> String.trim()
+
+    case Integer.parse(inputvalue) do
+      {number, ""} ->
+        number
+
+      _ ->
+        IO.puts("Invalid Input")
+    end
+
+    inputvalue
+  end
 end
+
+SearchTree.input("Enter the how many number you want")
