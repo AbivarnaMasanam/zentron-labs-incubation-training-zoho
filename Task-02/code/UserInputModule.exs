@@ -1,4 +1,4 @@
-Code.require_file("../BinarySearch.ex")
+# Code.require_file("../BinarySearch.ex")
 
 defmodule UserInputModule do
   def get_input(promt) do

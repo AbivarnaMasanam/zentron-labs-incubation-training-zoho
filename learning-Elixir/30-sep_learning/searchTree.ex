@@ -53,6 +53,9 @@ defmodule SearchTree do
 
     inputvalue
   end
+
+  def getInput do
+  end
 end
 
 SearchTree.input("Enter the how many number you want")
