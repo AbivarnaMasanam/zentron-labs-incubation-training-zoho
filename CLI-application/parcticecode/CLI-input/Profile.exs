@@ -1,0 +1,5 @@
+[name, age, city] = System.argv()
+age = String.to_integer(age)
+IO.puts("Name: #{name}")
+IO.puts("Age: #{age}")
+IO.puts("City: #{city}")
