@@ -1,0 +1,155 @@
+# alias Vix.Vips.{Image, Operation}
+
+# defmodule ImageProcessor do
+#   def list_function do
+#     IO.puts("\nSelect Option to Process the Image")
+#     IO.puts("1. Rotate Image")
+#     IO.puts("2. Invert Color of the Image")
+#     IO.puts("3. Convert to JPG with Quality")
+#     IO.puts("0. Exit")
+#   end
+
+#   def image_process(input) do
+#     list_function()
+
+#     process_input =
+#       ImageCli.userinput()
+
+#     case Integer.parse(process_input) do
+#       {1, ""} ->
+#         rotate_image(input)
+
+#       {2, ""} ->
+#         invert_color(input)
+
+#       {3, ""} ->
+#         convert(input)
+
+#       {0, ""} ->
+#         IO.puts("Exiting Program...\nExited.")
+
+#       _ ->
+#         IO.puts("Invalid Input! Try again. To exit enter 0.\n-------------------------------------------------")
+#         image_process(input)
+#     end
+#   end
+
+
+
+
+
+
+
+#   def rotate_image(input) do
+
+#     {:ok, image_data} = Image.new_from_file(input)
+
+#     degree_input =
+#       ImageCli.userinput("Enter the Rotate Degree (90, 180, 270, 360): ")
+
+#     case Integer.parse(degree_input) do
+#       {degree, ""} when degree in [90, 180, 270, 360] ->
+#         {:ok, rotated} = Operation.rotate(image_data, degree)
+
+#         :ok = Image.write_to_file(rotated, "rotated.jpg")
+
+#         IO.puts("Image rotated successfully!")
+
+#       _ ->
+#         IO.puts("Invalid input! Please enter 90, 180, 270, or 360.")
+#         rotate_image(input)
+#     end
+#   end
+
+
+#   def invert_color(input) do
+#    {:ok, image_data} = Image.new_from_file(input)
+
+#    {:ok, invert}= Operation.invert(image_data)
+
+#    :ok = Image.write_to_file(invert,"inverted.jpg")
+
+#     IO.puts("Image Inverted successfully!")
+
+#   end
+
+#   def convert(input) do
+
+#     {:ok, image_data} = Image.new_from_file(input)
+
+#     degree_input =
+#         ImageCli.userinput("Enter the Quality 0 to 100: ")
+#         |> String.to_integer()
+
+#       :ok = Image.write_to_file(image_data, "quality_#{degree_input}.jpg", Q: degree_input)
+
+#     IO.puts("JPEG files created!")
+
+#   end
+# end
+
+
+defmodule ImageProcessor do
+  alias Vix.Vips.{Image, Operation}
+
+  def list_function do
+    IO.puts("\nSelect Option to Process the Image")
+    IO.puts("1. Rotate Image")
+    IO.puts("2. Invert Color of the Image")
+    IO.puts("3. Convert to JPG with Quality")
+    IO.puts("0. Exit")
+  end
+
+  def image_process(images) do
+    list_function()
+
+    process_input =
+      ImageCli.userinput()
+      |> String.trim()
+
+    case Integer.parse(process_input) do
+      {1, ""} ->
+        rotate_images(images)
+
+      {2, ""} ->
+        invert_images(images)
+
+      {3, ""} ->
+        convert_images(images)
+
+      {0, ""} ->
+        IO.puts("Exiting Program...\nExited.")
+
+      _ ->
+        IO.puts(
+          "Invalid Input! Try again. To exit enter 0.\n-------------------------------------------------"
+        )
+
+        image_process(images)
+    end
+  end
+
+  def rotate_images(images) do
+    IO.puts("Images received for rotation:")
+
+    Enum.each(images, fn image ->
+      IO.puts(image)
+    end)
+  end
+
+  def invert_images(images) do
+    IO.puts("Images received for inversion:")
+
+    Enum.each(images, fn image ->
+      IO.puts(image)
+    end)
+  end
+
+  def convert_images(images) do
+    IO.puts("Images received for conversion:")
+
+    Enum.each(images, fn image ->
+      IO.puts(image)
+    end)
+  end
+end
