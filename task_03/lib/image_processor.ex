@@ -221,12 +221,12 @@ defmodule ImageProcessor do
   end
 
   def convert_images(images) do
-    IO.puts("Images received for conversion:")
+    IO.puts("\nImages received for conversion:")
 
     case Integer.parse(option_input()) do
       {1, ""} ->
         Enum.each(images, fn image ->
-          {:ok, image_data} = Image.new_from_file(input)
+          {:ok, image_data} = Image.new_from_file(image)
 
           degree_input =
             ImageCli.userinput("Enter the Compress Quality 0 to 100: ")
@@ -242,12 +242,41 @@ defmodule ImageProcessor do
           ImageCli.userinput("Enter the Compress Quality 0 to 100: ")
           |> String.to_integer()
 
+        output_dir =
+          ImageCli.userinput(
+            "Enter output folder path (or press Enter for default 'output-images'): "
+          )
+          |> String.trim()
+
+        output_dir =
+          if output_dir == "" do
+            "output-images"
+          else
+            output_dir
+          end
+
+        File.mkdir_p!(output_dir)
+
         Enum.each(images, fn image ->
           {:ok, image_data} = Image.new_from_file(image)
-          img_name = Path.rootname(image)
+
+          img_name =
+            image
+            |> Path.basename()
+            |> Path.rootname()
+
+          output_filename =
+            "#{img_name}_quality_#{degree_input}.jpg"
+
+          output_path =
+            Path.join(output_dir, output_filename)
 
           :ok =
-            Image.write_to_file(image_data, "#{img_name}_#{degree_input}.jpg", Q: degree_input)
+            Image.write_to_file(
+              image_data,
+              output_path,
+              Q: degree_input
+            )
 
           IO.puts("JPEG files created!")
         end)
