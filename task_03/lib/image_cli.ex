@@ -21,7 +21,16 @@
 
 defmodule ImageCli do
   def run do
-    IO.puts("------ Image Manipulation CLI ------\n")
+    IO.puts("""
+    +-------------------------------------------------------------------+
+    |                                                                   |
+    |               ------ Image Manipulation CLI ------                |
+    |                              WELCOME!                             |
+    |                                                                   |
+    +-------------------------------------------------------------------+
+    """)
+
+    IO.puts("\n")
 
     input = userinput("Enter the \"Image/File or Folder Path\" (OR) Enter \"0\" to Exit:\n")
 
@@ -47,8 +56,36 @@ defmodule ImageCli do
         run()
 
       :exit ->
-        IO.puts("Exited...")
+        IO.puts("""
+        +-------------------------------------------------------------------+
+        |                                                                   |
+        |                      Exited Successfully...!                      |
+        |                      ********Thankyou********                     |
+        |                                                                   |
+        +-------------------------------------------------------------------+
+
+        """)
     end
+  end
+
+  def closing_function do
+    endInput =
+      userinput("\nWould you like to Continue(\"1\") or Exit(\"0\"). Press Any Key:")
+      |> Integer.parse()
+
+    if endInput == {1, ""},
+      do: ImageCli.run(),
+      else:
+        IO.puts("""
+
+        +-------------------------------------------------------------------+
+        |                                                                   |
+        |                      Exited Successfully...!                      |
+        |                      ********Thankyou********                     |
+        |                                                                   |
+        +-------------------------------------------------------------------+
+
+        """)
   end
 
   def userinput(output \\ "") do
