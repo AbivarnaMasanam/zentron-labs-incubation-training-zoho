@@ -23,7 +23,7 @@ defmodule ImageCli do
   def run do
     IO.puts("------ Image Manipulation CLI ------\n")
 
-    input = userinput("Enter the Image/File or Folder Path:\n")
+    input = userinput("Enter the \"Image/File or Folder Path\" (OR) Enter \"0\" to Exit:\n")
 
     case FileHandler.source_type(input) do
       :file ->
@@ -43,6 +43,10 @@ defmodule ImageCli do
 
       :not_found ->
         IO.puts("File or folder not found!")
+        run()
+
+      :exit ->
+        IO.puts("Exited...")
     end
   end
 
