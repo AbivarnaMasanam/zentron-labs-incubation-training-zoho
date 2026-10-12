@@ -28,17 +28,18 @@ defmodule ImageCli do
     case FileHandler.source_type(input) do
       :file ->
         IO.puts("Single file detected.")
-        ImageProcessor.image_process([input])
+        ImageProcessor.run([input], false)
 
       :folder ->
         IO.puts("Folder detected.")
         images = FileHandler.find_images(input)
 
         if Enum.empty?(images) do
-          IO.puts("No images found in the folder!")
+          IO.puts("No images found in the folder!\n")
+          run()
         else
           IO.puts("Total images found: #{Enum.count(images)}")
-          ImageProcessor.image_process(images)
+          ImageProcessor.run(images, true)
         end
 
       :not_found ->
