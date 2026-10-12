@@ -80,11 +80,15 @@
 
 #   end
 # end
+# ------------
+#
 
 defmodule ImageProcessor do
   alias Vix.Vips.{Image, Operation}
 
-  def list_function do
+  @output_dir "output"
+
+  def print_menu do
     IO.puts("\nSelect Option to Process the Image")
     IO.puts("1. Rotate Image")
     IO.puts("2. Invert Color of the Image")
@@ -92,8 +96,18 @@ defmodule ImageProcessor do
     IO.puts("0. Exit")
   end
 
-  def image_process(images) do
-    list_function()
+  def prompt_processing_mode do
+    ImageCli.userinput("""
+
+    Select the Process Option
+    1. One by One
+    2. Apply to all
+    0. Exit
+    """)
+  end
+
+  def run(images, isfolder) do
+    print_menu()
 
     process_input =
       ImageCli.userinput()
@@ -101,13 +115,13 @@ defmodule ImageProcessor do
 
     case Integer.parse(process_input) do
       {1, ""} ->
-        rotate_images(images)
+        if isfolder, do: folder_rotation(images), else: perform_rotation([images])
 
       {2, ""} ->
-        invert_images(images)
+        if isfolder, do: folder_inversion(images), else: perform_inversion(images)
 
       {3, ""} ->
-        convert_images(images)
+        if isfolder, do: folder_conversion(images), else: perform_conversion(images)
 
       {0, ""} ->
         IO.puts("Exiting Program...\nExited.")
@@ -117,179 +131,176 @@ defmodule ImageProcessor do
           "Invalid Input! Try again. To exit enter 0.\n-------------------------------------------------"
         )
 
-        image_process(images)
+        run(images, isfolder)
     end
   end
 
-  def rotate_images(images) do
-    IO.puts("\nImages received for rotation:")
+  def perform_rotation(images) do
+    images = if is_list(images), do: images, else: [images]
 
-    case Integer.parse(option_input()) do
-      {1, ""} ->
+    degree_input = ImageCli.userinput("Enter the Rotate Degree (1 to 360) or Enter 0 to Skip : ")
+
+    case Integer.parse(degree_input) do
+      {degree, ""} when degree > 0 and degree <= 360 ->
+        File.mkdir_p!(@output_dir)
+
         Enum.each(images, fn image ->
-          degree_input =
-            ImageCli.userinput(
-              "Enter the Rotate Degree (90, 180, 270, 360) or Enter \"0\" to Skip : "
-            )
+          with {:ok, image_data} <- Image.new_from_file(image),
+               {:ok, rotated} <- Operation.rotate(image_data, degree * 1.0) do
+            image_name = Path.basename(image)
+            output_path = Path.join(@output_dir, "rotated_#{image_name}")
 
-          {:ok, image_data} = Image.new_from_file(image)
-
-          case Integer.parse(degree_input) do
-            {degree, ""} when degree in [90, 180, 270, 360] ->
-              {:ok, rotated} = Operation.rotate(image_data, degree * 1.0)
-              img_name = Path.rootname(image)
-              :ok = Image.write_to_file(rotated, "rotated_#{img_name}.jpg")
-
-              IO.puts("Image rotated successfully!")
-
-            {0, ""} ->
-              IO.puts("Skiped...!")
+            :ok = Image.write_to_file(rotated, output_path)
+            IO.puts("#{image_name} rotated and saved to #{@output_dir}/!")
+          else
+            _ -> IO.puts("Failed to process #{image}")
           end
         end)
 
-      {2, ""} ->
-        degree_input =
-          ImageCli.userinput("Enter the Rotate Degree (90, 180, 270, 360) or Enter 0 to Skip : ")
-
-        case Integer.parse(degree_input) do
-          {degree, ""} when degree in [90, 180, 270, 360] ->
-            Enum.each(images, fn image ->
-              {:ok, image_data} = Image.new_from_file(image)
-
-              {:ok, rotated} = Operation.rotate(image_data, degree * 1.0)
-              img_name = Path.rootname(image)
-              :ok = Image.write_to_file(rotated, "rotated_#{img_name}.jpg")
-
-              IO.puts("Image rotated successfully!")
-            end)
-
-          {0, ""} ->
-            IO.puts("Skiped...!")
-        end
-
       {0, ""} ->
-        IO.puts("Exiting...\n Done")
+        IO.puts("Skipped...!")
 
       _ ->
-        IO.puts("Invalid Input... Try angain!")
-        rotate_images(images)
+        IO.puts("Invalid degree entered. Must be between 1 and 360. Skipping rotation.")
     end
   end
 
-  def invert_images(images) do
-    IO.puts("\nImages received for inversion:")
+  def perform_inversion(images) do
+    images = if is_list(images), do: images, else: [images]
 
-    case Integer.parse(option_input()) do
+    File.mkdir_p!(@output_dir)
+
+    Enum.each(images, fn image ->
+      with {:ok, image_data} <- Image.new_from_file(image),
+           {:ok, invert} <- Operation.invert(image_data) do
+        image_name = Path.basename(image)
+        output_path = Path.join(@output_dir, "inverted_#{image_name}")
+
+        :ok = Image.write_to_file(invert, output_path)
+        IO.puts("#{image_name} inverted and saved to #{@output_dir}/!")
+      else
+        _ -> IO.puts("Failed to process #{image}")
+      end
+    end)
+  end
+
+  def perform_conversion(images) do
+    images = if is_list(images), do: images, else: [images]
+
+    quality_input =
+      ImageCli.userinput("Enter the Compress Quality (0 to 100) or Enter 0 to Skip : ")
+
+    case Integer.parse(quality_input) do
+      {quality, ""} when quality >= 0 and quality <= 100 ->
+        if quality == 0 do
+          IO.puts("Skipped compression.")
+        else
+          File.mkdir_p!(@output_dir)
+
+          Enum.each(images, fn image ->
+            with {:ok, image_data} <- Image.new_from_file(image) do
+              image_name = Path.basename(image)
+              output_path = Path.join(@output_dir, "compressed_#{image_name}")
+
+              :ok = Image.write_to_file(image_data, output_path, Q: quality)
+              IO.puts("#{image_name} is compressed and saved to #{@output_dir}/!")
+            else
+              _ -> IO.puts("Failed to process #{image}")
+            end
+          end)
+        end
+
+      _ ->
+        IO.puts("Invalid quality value entered. Skipping conversion.")
+    end
+  end
+
+  def folder_rotation(images) do
+    IO.puts("\nImages received for rotation:")
+
+    case Integer.parse(prompt_processing_mode()) do
       {1, ""} ->
         Enum.each(images, fn image ->
-          processInput =
+          process_input =
             ImageCli.userinput("""
-            Enter \"Y\" to Continue \"N\" to Skip:
-            File Name: \"#{Path.basename(image)}\"}
+            Enter \"Y\" to Continue, \"N\" to Skip:
+            File Name: \"#{Path.basename(image)}\"
             """)
             |> String.upcase()
+            |> String.trim()
 
-          case processInput do
-            "Y" ->
-              {:ok, image_data} = Image.new_from_file(image)
-
-              {:ok, invert} = Operation.invert(image_data)
-              img_name = Path.rootname(image)
-              :ok = Image.write_to_file(invert, "inverted_#{img_name}.jpg")
-
-              IO.puts("Image Inverted successfully!")
-
-            "N" ->
-              IO.puts("Image Skiped...")
-          end
+          if process_input == "Y", do: perform_rotation(image), else: IO.puts("Image skipped...")
         end)
 
       {2, ""} ->
-        Enum.each(images, fn image ->
-          {:ok, image_data} = Image.new_from_file(image)
-
-          {:ok, invert} = Operation.invert(image_data)
-          img_name = Path.rootname(image)
-          :ok = Image.write_to_file(invert, "inverted_#{img_name}.jpg")
-
-          IO.puts("Image Inverted successfully!")
-        end)
+        perform_rotation(images)
 
       {0, ""} ->
-        IO.puts("Exiting...\n Done")
+        IO.puts("Exiting...\nDone")
+
+      _ ->
+        IO.puts("Invalid Input... Try again!")
+        folder_rotation(images)
     end
   end
 
-  def convert_images(images) do
-    IO.puts("\nImages received for conversion:")
+  def folder_inversion(images) do
+    IO.puts("\nImages received for inversion:")
 
-    case Integer.parse(option_input()) do
+    case Integer.parse(prompt_processing_mode()) do
       {1, ""} ->
         Enum.each(images, fn image ->
-          {:ok, image_data} = Image.new_from_file(image)
+          process_input =
+            ImageCli.userinput("""
+            Enter \"Y\" to Continue, \"N\" to Skip:
+            File Name: \"#{Path.basename(image)}\"
+            """)
+            |> String.upcase()
+            |> String.trim()
 
-          degree_input =
-            ImageCli.userinput("Enter the Compress Quality 0 to 100: ")
-            |> String.to_integer()
-
-          :ok = Image.write_to_file(image_data, "quality_#{degree_input}.jpg", Q: degree_input)
-
-          IO.puts("JPEG files created!")
+          if process_input == "Y", do: perform_inversion(image), else: IO.puts("Image skipped...")
         end)
 
       {2, ""} ->
-        degree_input =
-          ImageCli.userinput("Enter the Compress Quality 0 to 100: ")
-          |> String.to_integer()
+        perform_inversion(images)
 
-        output_dir =
-          ImageCli.userinput(
-            "Enter output folder path (or press Enter for default 'output-images'): "
-          )
-          |> String.trim()
+      {0, ""} ->
+        IO.puts("Exiting...\nDone")
 
-        output_dir =
-          if output_dir == "" do
-            "output-images"
-          else
-            output_dir
-          end
-
-        File.mkdir_p!(output_dir)
-
-        Enum.each(images, fn image ->
-          {:ok, image_data} = Image.new_from_file(image)
-
-          img_name =
-            image
-            |> Path.basename()
-            |> Path.rootname()
-
-          output_filename =
-            "#{img_name}_quality_#{degree_input}.jpg"
-
-          output_path =
-            Path.join(output_dir, output_filename)
-
-          :ok =
-            Image.write_to_file(
-              image_data,
-              output_path,
-              Q: degree_input
-            )
-
-          IO.puts("JPEG files created!")
-        end)
+      _ ->
+        IO.puts("Invalid Input... Try again!")
+        folder_inversion(images)
     end
   end
 
-  def option_input do
-    ImageCli.userinput("""
+  def folder_conversion(images) do
+    IO.puts("\nImages received for conversion:")
 
-    Select the Process Option
-    1.One by One
-    2.Apply to all
-    0.Exit
-    """)
+    case Integer.parse(prompt_processing_mode()) do
+      {1, ""} ->
+        Enum.each(images, fn image ->
+          process_input =
+            ImageCli.userinput("""
+            Enter \"Y\" to Continue, \"N\" to Skip:
+            File Name: \"#{Path.basename(image)}\"
+            """)
+            |> String.upcase()
+            |> String.trim()
+
+          if process_input == "Y",
+            do: perform_conversion(image),
+            else: IO.puts("Image skipped...")
+        end)
+
+      {2, ""} ->
+        perform_conversion(images)
+
+      {0, ""} ->
+        IO.puts("Exiting...\nDone")
+
+      _ ->
+        IO.puts("Invalid Input... Try again!")
+        folder_conversion(images)
+    end
   end
 end
