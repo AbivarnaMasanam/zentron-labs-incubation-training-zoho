@@ -136,7 +136,7 @@ defmodule ImageProcessor do
 
           case Integer.parse(degree_input) do
             {degree, ""} when degree in [90, 180, 270, 360] ->
-              {:ok, rotated} = Operation.rotate(image_data, degree)
+              {:ok, rotated} = Operation.rotate(image_data, degree * 1.0)
               img_name = Path.rootname(image)
               :ok = Image.write_to_file(rotated, "rotated_#{img_name}.jpg")
 
@@ -156,7 +156,7 @@ defmodule ImageProcessor do
             Enum.each(images, fn image ->
               {:ok, image_data} = Image.new_from_file(image)
 
-              {:ok, rotated} = Operation.rotate(image_data, degree)
+              {:ok, rotated} = Operation.rotate(image_data, degree * 1.0)
               img_name = Path.rootname(image)
               :ok = Image.write_to_file(rotated, "rotated_#{img_name}.jpg")
 
