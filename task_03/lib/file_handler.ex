@@ -19,6 +19,9 @@ defmodule FileHandler do
       File.exists?(source) ->
         :file
 
+      "0" ->
+        :exit
+
       true ->
         :not_found
     end
