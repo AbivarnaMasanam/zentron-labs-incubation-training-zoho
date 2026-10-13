@@ -54,15 +54,7 @@ defmodule ImageCli do
         run()
 
       :exit ->
-        IO.puts("""
-        +-------------------------------------------------------------------+
-        |                                                                   |
-        |                      Exited Successfully...!                      |
-        |                      ********Thankyou********                     |
-        |                                                                   |
-        +-------------------------------------------------------------------+
-
-        """)
+        ImageProcessor.exit_output()
     end
   end
 
@@ -73,17 +65,7 @@ defmodule ImageCli do
 
     if endInput == {1, ""},
       do: ImageCli.run(),
-      else:
-        IO.puts("""
-
-        +-------------------------------------------------------------------+
-        |                                                                   |
-        |                      Exited Successfully...!                      |
-        |                      ********Thankyou********                     |
-        |                                                                   |
-        +-------------------------------------------------------------------+
-
-        """)
+      else: ImageProcessor.exit_output()
   end
 
   def userinput(output \\ "") do
