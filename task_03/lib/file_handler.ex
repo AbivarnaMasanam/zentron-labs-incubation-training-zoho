@@ -33,7 +33,7 @@ defmodule FileHandler do
     case File.ls(folder_path) do
       {:ok, files} ->
         Enum.filter(files, fn file ->
-          Path.extname(file) in image_extensions
+          (Path.extname(file) |> String.downcase()) in image_extensions
         end)
         |> Enum.map(fn file ->
           Path.join(folder_path, file)
