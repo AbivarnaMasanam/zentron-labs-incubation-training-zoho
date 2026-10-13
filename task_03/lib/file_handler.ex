@@ -19,7 +19,7 @@ defmodule FileHandler do
       File.exists?(source) ->
         :file
 
-      "0" ->
+      source == "0" ->
         :exit
 
       true ->
