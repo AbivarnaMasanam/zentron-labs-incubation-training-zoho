@@ -209,11 +209,20 @@ defmodule ImageProcessor do
 
           Enum.each(images, fn image ->
             with {:ok, image_data} <- Image.new_from_file(image) do
-              image_name = Path.rootname(image)
-              output_path = Path.join(@output_dir, "compressed_#{image_name}.jpgs")
+              image_name = image |> Path.basename() |> Path.rootname()
 
-              :ok = Image.write_to_file(image_data, output_path, Q: quality)
-              IO.puts("#{image_name} is compressed and saved to \"#{@output_dir}/\":")
+              output_path = Path.join(@output_dir, "compressed_#{image_name}.jpg")
+
+              case Image.write_to_file(image_data, output_path, Q: quality) do
+                :ok ->
+                  IO.puts(
+                    "#{image_name} compressed and converted to JPG successfully, and saved to \"#{@output_dir}/\":"
+                  )
+
+                {:error, reason} ->
+                  IO.puts("Failed to write #{image_name}.jpg")
+                  IO.puts("Reason: #{reason}")
+              end
             else
               {:error, reason} ->
                 IO.puts("Failed to process #{image}")
