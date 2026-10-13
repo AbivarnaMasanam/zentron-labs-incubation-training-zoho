@@ -169,7 +169,7 @@ defmodule ImageProcessor do
         end)
 
       {0, ""} ->
-        exit_output()
+        IO.puts("Skipped...!")
 
       _ ->
         IO.puts("Invalid degree entered. Must be between 1 and 360. Skipping rotation.")
