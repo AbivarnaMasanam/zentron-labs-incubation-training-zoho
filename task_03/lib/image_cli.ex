@@ -30,8 +30,6 @@ defmodule ImageCli do
     +-------------------------------------------------------------------+
     """)
 
-    IO.puts("\n")
-
     input = userinput("Enter the \"Image/File or Folder Path\" (OR) Enter \"0\" to Exit:\n")
 
     case FileHandler.source_type(input) do
@@ -40,7 +38,7 @@ defmodule ImageCli do
         ImageProcessor.run([input], false)
 
       :folder ->
-        IO.puts("Folder detected.")
+        IO.puts("\nFolder detected.")
         images = FileHandler.find_images(input)
 
         if Enum.empty?(images) do
