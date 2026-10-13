@@ -90,11 +90,14 @@ defmodule ImageProcessor do
   @output_dir "output"
 
   def print_menu do
-    IO.puts("\nSelect Option to Process the Image")
-    IO.puts("1. Rotate Image")
-    IO.puts("2. Invert Color of the Image")
-    IO.puts("3. Convert to JPG with Quality")
-    IO.puts("0. Exit")
+    IO.puts("""
+
+    Select Option to Process the Image:
+    1. Rotate Image
+    2. Invert Color of the Image
+    3. Convert to JPG with Quality
+    0. Exit
+    """)
   end
 
   def prompt_processing_mode do
@@ -107,40 +110,38 @@ defmodule ImageProcessor do
     """)
   end
 
-  def run(images, isfolder) do
-    print_menu()
+  def exit_output do
+    IO.puts("""
+    +-------------------------------------------------------------------+
+    |                                                                   |
+    |                      Exited Successfully...!                      |
+    |                      ********Thankyou********                     |
+    |                                                                   |
+    +-------------------------------------------------------------------+
 
+    """)
+  end
+
+  def ask_proform(image) do
     process_input =
-      ImageCli.userinput()
+      ImageCli.userinput("""
+
+      Enter \"Y\" to Continue, \"N\" to Skip:
+      File Name: \"#{Path.basename(image)}\"
+      """)
+      |> String.upcase()
       |> String.trim()
 
-    case Integer.parse(process_input) do
-      {1, ""} ->
-        if isfolder, do: folder_rotation(images), else: perform_rotation([images])
+    case process_input do
+      "Y" ->
+        perform_conversion(image)
 
-      {2, ""} ->
-        if isfolder, do: folder_inversion(images), else: perform_inversion(images)
-
-      {3, ""} ->
-        if isfolder, do: folder_conversion(images), else: perform_conversion(images)
-
-      {0, ""} ->
-        IO.puts("""
-        +-------------------------------------------------------------------+
-        |                                                                   |
-        |                      Exited Successfully...!                      |
-        |                      ********Thankyou********                     |
-        |                                                                   |
-        +-------------------------------------------------------------------+
-
-        """)
+      "N" ->
+        IO.puts("Image skipped...")
 
       _ ->
-        IO.puts(
-          "Invalid Input! Try again. To exit enter 0.\n-------------------------------------------------"
-        )
-
-        run(images, isfolder)
+        IO.puts("Invalid Input! Please enter 'Y' or 'N'. Try again.")
+        ask_proform(image)
     end
   end
 
@@ -161,14 +162,14 @@ defmodule ImageProcessor do
             output_path = Path.join(@output_dir, "rotated_#{image_name}")
 
             :ok = Image.write_to_file(rotated, output_path)
-            IO.puts("#{image_name} rotated and saved to \"#{@output_dir}\"/:")
+            IO.puts("\n#{image_name} rotated and saved to \"#{@output_dir}/\":")
           else
             _ -> IO.puts("Failed to process #{image}")
           end
         end)
 
       {0, ""} ->
-        IO.puts("Skipped...!")
+        exit_output()
 
       _ ->
         IO.puts("Invalid degree entered. Must be between 1 and 360. Skipping rotation.")
@@ -187,7 +188,7 @@ defmodule ImageProcessor do
         output_path = Path.join(@output_dir, "inverted_#{image_name}")
 
         :ok = Image.write_to_file(invert, output_path)
-        IO.puts("#{image_name} inverted and saved to \"#{@output_dir}\"/:")
+        IO.puts("#{image_name} inverted and saved to \"#{@output_dir}/\":")
       else
         _ -> IO.puts("Failed to process #{image}")
       end
@@ -213,7 +214,7 @@ defmodule ImageProcessor do
               output_path = Path.join(@output_dir, "compressed_#{image_name}")
 
               :ok = Image.write_to_file(image_data, output_path, Q: quality)
-              IO.puts("#{image_name} is compressed and saved to \"#{@output_dir}\"/:")
+              IO.puts("#{image_name} is compressed and saved to \"#{@output_dir}/\":")
             else
               _ -> IO.puts("Failed to process #{image}")
             end
@@ -221,7 +222,7 @@ defmodule ImageProcessor do
         end
 
       _ ->
-        IO.puts("Invalid quality value entered. Skipping conversion.")
+        IO.puts("Invalid quality value entered..")
         perform_conversion(images)
     end
   end
@@ -251,15 +252,7 @@ defmodule ImageProcessor do
         ImageCli.closing_function()
 
       {0, ""} ->
-        IO.puts("""
-        +-------------------------------------------------------------------+
-        |                                                                   |
-        |                      Exited Successfully...!                      |
-        |                      ********Thankyou********                     |
-        |                                                                   |
-        +-------------------------------------------------------------------+
-
-        """)
+        exit_output()
 
       _ ->
         IO.puts("Invalid Input... Try again!")
@@ -292,15 +285,7 @@ defmodule ImageProcessor do
         ImageCli.closing_function()
 
       {0, ""} ->
-        IO.puts("""
-        +-------------------------------------------------------------------+
-        |                                                                   |
-        |                      Exited Successfully...!                      |
-        |                      ********Thankyou********                     |
-        |                                                                   |
-        +-------------------------------------------------------------------+
-
-        """)
+        exit_output()
 
       _ ->
         IO.puts("Invalid Input... Try again!")
@@ -324,15 +309,7 @@ defmodule ImageProcessor do
         ImageCli.closing_function()
 
       {0, ""} ->
-        IO.puts("""
-        +-------------------------------------------------------------------+
-        |                                                                   |
-        |                      Exited Successfully...!                      |
-        |                      ********Thankyou********                     |
-        |                                                                   |
-        +-------------------------------------------------------------------+
-
-        """)
+        exit_output()
 
       _ ->
         IO.puts("Invalid Input... Try again!")
@@ -340,26 +317,32 @@ defmodule ImageProcessor do
     end
   end
 
-  def ask_proform(image) do
-    process_input =
-      ImageCli.userinput("""
+  def run(images, isfolder) do
+    print_menu()
 
-      Enter \"Y\" to Continue, \"N\" to Skip:
-      File Name: \"#{Path.basename(image)}\"
-      """)
-      |> String.upcase()
+    process_input =
+      ImageCli.userinput()
       |> String.trim()
 
-    case process_input do
-      "Y" ->
-        perform_conversion(image)
+    case Integer.parse(process_input) do
+      {1, ""} ->
+        if isfolder, do: folder_rotation(images), else: perform_rotation([images])
 
-      "N" ->
-        IO.puts("Image skipped...")
+      {2, ""} ->
+        if isfolder, do: folder_inversion(images), else: perform_inversion(images)
+
+      {3, ""} ->
+        if isfolder, do: folder_conversion(images), else: perform_conversion(images)
+
+      {0, ""} ->
+        exit_output()
 
       _ ->
-        IO.puts("Invalid Input! Please enter 'Y' or 'N'. Try again.")
-        ask_proform(image)
+        IO.puts(
+          "Invalid Input! Try again. To exit enter 0.\n-------------------------------------------------"
+        )
+
+        run(images, isfolder)
     end
   end
 end
