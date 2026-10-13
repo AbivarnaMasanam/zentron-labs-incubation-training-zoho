@@ -84,7 +84,6 @@
 #
 
 defmodule ImageProcessor do
-  alias Vix.Vips.Array.Image
   alias Vix.Vips.{Image, Operation}
 
   @output_dir "output"
@@ -122,7 +121,7 @@ defmodule ImageProcessor do
     """)
   end
 
-  def ask_proform(image) do
+  def confirm_conversion(image) do
     process_input =
       ImageCli.userinput("""
 
@@ -141,7 +140,7 @@ defmodule ImageProcessor do
 
       _ ->
         IO.puts("Invalid Input! Please enter 'Y' or 'N'. Try again.")
-        ask_proform(image)
+        confirm_conversion(image)
     end
   end
 
@@ -210,13 +209,15 @@ defmodule ImageProcessor do
 
           Enum.each(images, fn image ->
             with {:ok, image_data} <- Image.new_from_file(image) do
-              image_name = Path.basename(image)
-              output_path = Path.join(@output_dir, "compressed_#{image_name}")
+              image_name = Path.rootname(image)
+              output_path = Path.join(@output_dir, "compressed_#{image_name}.jpgs")
 
               :ok = Image.write_to_file(image_data, output_path, Q: quality)
               IO.puts("#{image_name} is compressed and saved to \"#{@output_dir}/\":")
             else
-              _ -> IO.puts("Failed to process #{image}")
+              {:error, reason} ->
+                IO.puts("Failed to process #{image}")
+                IO.puts("Reason: #{reason}")
             end
           end)
         end
@@ -299,7 +300,7 @@ defmodule ImageProcessor do
     case Integer.parse(prompt_processing_mode()) do
       {1, ""} ->
         Enum.each(images, fn image ->
-          ask_proform(image)
+          confirm_conversion(image)
         end)
 
         ImageCli.closing_function()
@@ -326,7 +327,7 @@ defmodule ImageProcessor do
 
     case Integer.parse(process_input) do
       {1, ""} ->
-        if isfolder, do: folder_rotation(images), else: perform_rotation([images])
+        if isfolder, do: folder_rotation(images), else: perform_rotation(images)
 
       {2, ""} ->
         if isfolder, do: folder_inversion(images), else: perform_inversion(images)

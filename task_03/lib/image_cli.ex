@@ -20,6 +20,21 @@
 # end
 
 defmodule ImageCli do
+  def userinput(output \\ "") do
+    IO.gets(output)
+    |> String.trim()
+  end
+
+  def closing_function do
+    endInput =
+      userinput("\nWould you like to Continue(\"1\") or Exit(\"0\"). Press Any Key:")
+      |> Integer.parse()
+
+    if endInput == {1, ""},
+      do: ImageCli.run(),
+      else: ImageProcessor.exit_output()
+  end
+
   def run do
     IO.puts("""
     +-------------------------------------------------------------------+
@@ -56,20 +71,5 @@ defmodule ImageCli do
       :exit ->
         ImageProcessor.exit_output()
     end
-  end
-
-  def closing_function do
-    endInput =
-      userinput("\nWould you like to Continue(\"1\") or Exit(\"0\"). Press Any Key:")
-      |> Integer.parse()
-
-    if endInput == {1, ""},
-      do: ImageCli.run(),
-      else: ImageProcessor.exit_output()
-  end
-
-  def userinput(output \\ "") do
-    IO.gets(output)
-    |> String.trim()
   end
 end
