@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <div class="page-wrapper">
-  <main class="page-main">
+  <main class="page-main">  
     <%= if @images == [] do %>
       <%!-- ===================== UPLOAD PAGE ===================== --%>
       <div class="container">
@@ -39,7 +39,7 @@
                 <h3>Selected Images</h3>
                 <p><%= length(@uploads.image.entries) %> of 10 images selected</p>
               </div>
-
+            <%!-- thumbnail of the image created here!.. --%>
               <div class="preview-list">
                 <div :for={entry <- @uploads.image.entries} class="preview-card">
                   <div class="preview-thumb-box">
