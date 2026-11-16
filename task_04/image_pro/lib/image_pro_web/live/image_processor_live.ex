@@ -32,23 +32,6 @@ defmodule ImageProWeb.ImageProcessorLive do
     {:ok, socket}
   end
 
-  # --------------------------------------------------
-  # cleanup previous files (originals, processed, thumbnails, zips)
-  # --------------------------------------------------
-
-  defp cleanup_previous_files do
-    [@original_dir, @processed_dir, @thumb_dir, @zip_dir]
-    |> Enum.each(fn dir ->
-      File.mkdir_p!(dir)
-
-      dir
-      |> File.ls!()
-      |> Enum.each(fn file ->
-        File.rm_rf!(Path.join(dir, file))
-      end)
-    end)
-  end
-
   def render(%{step: :download} = assigns), do: ImageProWeb.PageHTML.downloadfile(assigns)
   def render(assigns), do: ImageProWeb.PageHTML.choosefile(assigns)
 
@@ -153,6 +136,23 @@ defmodule ImageProWeb.ImageProcessorLive do
          |> assign(:zip_url, zip_url)
          |> assign(:step, :download)}
     end
+  end
+
+  # --------------------------------------------------
+  # cleanup previous files (originals, processed, thumbnails, zips)
+  # --------------------------------------------------
+
+  defp cleanup_previous_files do
+    [@original_dir, @processed_dir, @thumb_dir, @zip_dir]
+    |> Enum.each(fn dir ->
+      File.mkdir_p!(dir)
+
+      dir
+      |> File.ls!()
+      |> Enum.each(fn file ->
+        File.rm_rf!(Path.join(dir, file))
+      end)
+    end)
   end
 
   # --------------------------------------------------
@@ -280,7 +280,7 @@ defmodule ImageProWeb.ImageProcessorLive do
   end
 
   # --------------------------------------------------
-  # Helpers: zip for groups (ZIP, not RAR: RAR can't be created without a licensed tool)
+  # Helpers: zip for groups of images
   # --------------------------------------------------
 
   # two files named photo.png / photo.jpg both become photo.jpg -> "photo (1).jpg"
