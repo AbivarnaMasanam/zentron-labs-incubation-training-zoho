@@ -18,8 +18,6 @@ defmodule ImageProWeb.Router do
     pipe_through(:browser)
 
     live("/", PageLive)
-    live("/image-processor", ImageProcessorLive)
-    # live("/rotate", ImageProcessorLive)
     live("/process/:operation", ImageProcessorLive)
   end
 
